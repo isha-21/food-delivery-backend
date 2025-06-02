@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d  # Automatically runs init.sql at first startup
+
+  user_service:
+    build:
+      context: ./user_service
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: user_db
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/user_db
+    ports:
+      - "8001:8000"
+
+  restaurant_service:
+    build:
+      context: ./restaurant_service
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurant_db
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/restaurant_db
+    ports:
+      - "8002:8000"
+
+  delivery_service:
+    build:
+      context: ./delivery_service
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: delivery_db
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/delivery_db
+    ports:
+      - "8003:8000"
